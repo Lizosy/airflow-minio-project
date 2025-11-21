@@ -1,0 +1,27 @@
+# Requirements for Airflow DAGs
+# Install these packages if you want to run DAGs locally
+
+# Core packages
+pandas>=2.0.0
+numpy>=1.24.0
+
+# Data processing
+openpyxl>=3.1.0
+python-dateutil>=2.8.2
+
+# Airflow providers
+apache-airflow-providers-amazon>=8.0.0
+
+# Web scraping (for marketplace scraper)
+selenium>=4.15.0
+webdriver-manager>=4.0.0
+beautifulsoup4>=4.12.0
+lxml>=5.0.0
+
+# Additional utilities
+python-dotenv>=1.0.0
+requests>=2.31.0
+
+# Chrome/Chromium for Selenium (install via system package manager)
+# Linux: apt-get install chromium-browser chromium-chromedriver
+# Or use webdriver-manager to auto-download
