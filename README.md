@@ -167,144 +167,84 @@ docker-compose down -v
 
 ## 📊 Available DAGs
 
-### 1. `complete_etl_pipeline` ⭐ **Main Project DAG**
-**DAG ID:** `complete_etl_pipeline`  
-**Schedule:** Every 6 hours (`0 */6 * * *`)  
-**Purpose:** Complete ETL pipeline meeting all course requirements
+### 1. `complete_etl_pipeline` ⭐ **Main Project**
+**Schedule:** Every 6 hours | **Purpose:** Complete ETL pipeline for course requirements
 
-**Pipeline Stages:**
-1. **scrape_raw_data** - Web scraping with Selenium + BeautifulSoup
-2. **store_raw_data** - Save raw CSV to MinIO
-3. **clean_transform_data** - 8-step data quality pipeline with Pandas
-4. **store_processed_data** - Save Parquet to MinIO + load to PostgreSQL
-5. **verify_data_quality** - Validate schema, types, and generate statistics
-6. **generate_quality_report** - Create comprehensive quality summary
+**Pipeline:** Scrape → Store Raw → Clean/Transform → Store Processed → Verify → Report
 
-**Key Features:**
-- ✅ Full ETL lifecycle (Extract → Transform → Load)
+**Features:**
+- ✅ Full ETL lifecycle with 8-step data cleaning
 - ✅ Multi-format storage (CSV, Parquet, PostgreSQL)
-- ✅ 8-step data cleaning pipeline
-- ✅ Price outlier detection (quantile-based)
-- ✅ Phone model extraction from titles
-- ✅ Quality verification with assertions
-- ✅ Automatic error handling & retries
-- ✅ Detailed logging at each stage
+- ✅ Price outlier detection & phone model extraction
+- ✅ Quality verification & error handling
 
-**Best For:** Production use, course submission, complete data pipeline
+**Best For:** Production use, course submission
 
 ---
 
 ### 2. `marketplace_advanced_flow`
-**DAG ID:** `marketplace_advanced_flow`  
-**Schedule:** Every 6 hours (`0 */6 * * *`)  
-**Purpose:** Advanced workflow with parallel scraping
+**Schedule:** Every 6 hours | **Purpose:** Parallel scraping workflow
 
-**Pipeline Stages:**
-1. **start** - Initialize workflow
-2. **scrape_[keyword]** - Parallel scraping for multiple keywords
-3. **validate_data_quality** - Check data completeness (branching logic)
-4. **store_data_[keyword]** - Save by keyword to MinIO
-5. **cleanup_old_files** - Remove files older than 30 days
-6. **notify_success / notify_failure** - Status notifications
+**Features:**
+- 🔄 Parallel keyword scraping
+- 🌲 Branching logic (auto skip bad data)
+- 🧹 Auto cleanup (30-day retention)
+- 📁 Organized by keyword
 
-**Key Features:**
-- 🔄 Parallel execution (scrape multiple keywords simultaneously)
-- 🌲 Branching logic (skip bad data automatically)
-- 📁 Organized storage (by_keyword/ folder structure)
-- 🧹 Auto cleanup (30-day retention policy)
-- 🔔 Success/failure notifications
-- ⚡ Optimized for high-volume scraping
-
-**Best For:** Large-scale scraping, multiple product categories, production scalability
+**Best For:** Large-scale scraping, multiple categories
 
 ---
 
 ### 3. `marketplace_scraper_with_details`
-**DAG ID:** `marketplace_scraper_with_details`  
-**Schedule:** Hourly (`0 * * * *`)  
-**Purpose:** Detailed scraper with smart deduplication
+**Schedule:** Hourly | **Purpose:** Detailed scraper with deduplication
 
-**Pipeline Stages:**
-1. **scrape_marketplace_data** - Scrape with optional login (Airflow Variables)
-2. **fetch_product_details** - Get detailed info (condition, description, specs)
-3. **deduplicate_and_store** - Smart dedup logic (insert/update/skip)
-4. **save_hourly_snapshot** - Replace mode (hourly files)
-5. **save_daily_cumulative** - Append mode (daily aggregation)
+**Features:**
+- 🔐 Login support (Airflow Variables)
+- 📝 Detailed info (condition, description)
+- 🔍 Smart dedup (insert/update/skip)
+- ⏰ Hourly + daily snapshots
 
-**Key Features:**
-- 🔐 Login support (via Airflow Variables: fb_marketplace_email, fb_marketplace_password)
-- 📝 Detailed product information (condition, full description)
-- 🔍 Smart deduplication:
-  - **Insert** - New URLs
-  - **Update** - Existing URLs with different data
-  - **Skip** - Exact duplicates
-- ⏰ Hourly snapshots (marketplace_YYYYMMDD_HH.csv)
-- 📅 Daily cumulative (marketplace_YYYYMMDD.csv)
-- 🎯 URL-based duplicate detection
-
-**Best For:** Frequent monitoring, price tracking, detailed product analysis
+**Best For:** Price tracking, detailed analysis
 
 ---
 
-### 4. `marketplace_scraper` (Basic Version)
-**DAG ID:** `facebook_marketplace_scraper`  
-**Schedule:** Every 6 hours (`0 */6 * * *`)  
-**Purpose:** Simple scraper for learning
+### 4. `marketplace_scraper` (Basic)
+**Schedule:** Every 6 hours | **Purpose:** Simple scraper for learning
 
-**Pipeline Stages:**
-1. **scrape_marketplace** - Basic scraping (title, price, location)
-2. **store_to_minio** - Save CSV to MinIO
+**Features:**
+- 📱 Basic info (title, price, location)
+- 🚀 Fast execution, clean code
 
-**Key Features:**
-- 📱 Basic info only (title, price, location, image)
-- 💾 Simple storage (CSV to MinIO)
-- 🎓 Clean, readable code
-- 🚀 Fast execution
-
-**Best For:** Learning, testing, basic scraping needs
+**Best For:** Learning, testing
 
 ---
 
-### 5. `etl_pipeline_minio` (Legacy/Example)
-**DAG ID:** `etl_pipeline_minio`  
-**Schedule:** Hourly (`@hourly`)  
-**Purpose:** ETL reference implementation
+### 5. `etl_pipeline_minio` (Legacy)
+**Schedule:** Hourly | **Purpose:** ETL reference
 
-**Pipeline Stages:**
-1. **extract_from_minio** - Read raw data from MinIO
-2. **transform_data** - Basic cleaning and aggregation
-3. **load_to_minio** - Write back to MinIO
-4. **generate_report** - Create summary statistics
+**Pipeline:** Extract → Transform → Load → Report
 
-**Best For:** Learning ETL concepts, post-processing existing data
+**Best For:** Learning ETL concepts
 
 ---
 
 ### 6. `minio_upload_example`
-**DAG ID:** `minio_upload_example`  
-**Schedule:** Daily (`@daily`)  
-**Purpose:** Test MinIO connection
+**Schedule:** Daily | **Purpose:** Test MinIO connection
 
-**Pipeline Stages:**
-1. **test_connection** - Verify MinIO connectivity
-2. **create_bucket** - Ensure bucket exists
-3. **upload_test_file** - Upload sample file
-4. **list_files** - Display bucket contents
-
-**Best For:** Testing MinIO setup, debugging connection issues
+**Best For:** Testing setup
 
 ---
 
-## 📊 DAG Comparison Table
+## 📊 Quick Comparison
 
-| DAG | Complexity | Speed | Detail Level | Best Use Case |
-|-----|-----------|-------|-------------|---------------|
-| `complete_etl_pipeline` ⭐ | ⭐⭐⭐⭐⭐ | Medium | Very High | Production, Course Submission |
-| `marketplace_advanced_flow` | ⭐⭐⭐⭐ | Fast | High | Large-scale, Multi-keyword |
-| `marketplace_scraper_with_details` | ⭐⭐⭐ | Medium | Very High | Price Tracking, Details |
-| `marketplace_scraper` | ⭐⭐ | Fast | Medium | Learning, Basic Scraping |
-| `etl_pipeline_minio` | ⭐⭐ | Fast | Low | ETL Learning, Reprocessing |
-| `minio_upload_example` | ⭐ | Very Fast | N/A | Testing, Debugging |
+| DAG | Complexity | Speed | Best For |
+|-----|-----------|-------|----------|
+| `complete_etl_pipeline` ⭐ | High | Medium | Production, Submission |
+| `marketplace_advanced_flow` | High | Fast | Large-scale, Multi-keyword |
+| `marketplace_scraper_with_details` | Medium | Medium | Tracking, Details |
+| `marketplace_scraper` | Low | Fast | Learning, Testing |
+| `etl_pipeline_minio` | Low | Fast | ETL Learning |
+| `minio_upload_example` | Very Low | Very Fast | Testing |
 
 ## 🗂️ MinIO Storage Structure
 
