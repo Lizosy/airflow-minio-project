@@ -405,14 +405,14 @@ def clean_and_transform_data(**context):
     
     df_clean = df[final_columns].copy()
     
-    # Generate quality report
+    # Generate quality report (convert numpy types to Python native types)
     quality_report = {
-        'initial_rows': quality_issues['initial_rows'],
-        'final_rows': len(df_clean),
-        'rows_removed': quality_issues['initial_rows'] - len(df_clean),
-        'missing_prices': df_clean['price_numeric'].isna().sum(),
-        'price_outliers': df_clean['is_price_outlier'].sum(),
-        'unique_models': df_clean['phone_model'].nunique(),
+        'initial_rows': int(quality_issues['initial_rows']),
+        'final_rows': int(len(df_clean)),
+        'rows_removed': int(quality_issues['initial_rows'] - len(df_clean)),
+        'missing_prices': int(df_clean['price_numeric'].isna().sum()),
+        'price_outliers': int(df_clean['is_price_outlier'].sum()),
+        'unique_models': int(df_clean['phone_model'].nunique()),
         'price_range': {
             'min': float(df_clean['price_numeric'].min()) if df_clean['price_numeric'].notna().any() else None,
             'max': float(df_clean['price_numeric'].max()) if df_clean['price_numeric'].notna().any() else None,
@@ -447,7 +447,7 @@ def store_processed_data(**context):
     - Parquet: Column-oriented, compressed, optimized for analytics
     - PostgreSQL: Structured querying and ACID compliance
     """
-    csv_content = context['ti'].xcom_push(key='clean_data', task_ids='clean_transform_data')
+    csv_content = context['ti'].xcom_pull(key='clean_data', task_ids='clean_transform_data')
     df = pd.read_csv(StringIO(csv_content))
     
     logger.info("="*70)
@@ -569,7 +569,7 @@ def verify_data_quality(**context):
     - Data distribution analysis
     """
     csv_content = context['ti'].xcom_pull(key='clean_data', task_ids='clean_transform_data')
-    df = pd.read_csv(StringIO(csv_content))
+    df = pd.read_csv(StringIO(csv_content), parse_dates=['scraped_at'])
     quality_report_json = context['ti'].xcom_pull(key='quality_report', task_ids='clean_transform_data')
     quality_report = json.loads(quality_report_json)
     
