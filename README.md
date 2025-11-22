@@ -1,6 +1,11 @@
-# Facebook Marketplace ETL Pipeline - Data Engineering Project
+# 🚀 Facebook Marketplace Data Pipeline - Complete ETL Project
 
-Complete end-to-end data pipeline for scraping, processing, and analyzing Facebook Marketplace data using Apache Airflow, MinIO, and PostgreSQL.
+Complete end-to-end data engineering pipeline for scraping, processing, and analyzing Facebook Marketplace data using Apache Airflow, MinIO, PostgreSQL, and advanced data transformation techniques.
+
+![Python](https://img.shields.io/badge/Python-3.11-blue)
+![Airflow](https://img.shields.io/badge/Airflow-2.7+-green)
+![Docker](https://img.shields.io/badge/Docker-Compose-blue)
+![MinIO](https://img.shields.io/badge/MinIO-S3-red)
 
 ## 🎓 Course Requirements Coverage
 
@@ -163,45 +168,143 @@ docker-compose down -v
 ## 📊 Available DAGs
 
 ### 1. `complete_etl_pipeline` ⭐ **Main Project DAG**
-- **Schedule:** Every 6 hours
-- **Description:** Complete ETL pipeline meeting all course requirements
-- **Pipeline Stages:**
-  1. **Data Acquisition:** Scrape Facebook Marketplace
-  2. **Store Raw Data:** Save to MinIO (CSV)
-  3. **Clean & Transform:** 8-step Pandas pipeline
-  4. **Store Processed:** Parquet + PostgreSQL
-  5. **Verify Quality:** Statistics & validation
-- **Features:**
-  - Comprehensive data cleaning
-  - Multi-format storage
-  - Quality verification
-  - Error handling & retries
-  - Detailed logging
+**DAG ID:** `complete_etl_pipeline`  
+**Schedule:** Every 6 hours (`0 */6 * * *`)  
+**Purpose:** Complete ETL pipeline meeting all course requirements
+
+**Pipeline Stages:**
+1. **scrape_raw_data** - Web scraping with Selenium + BeautifulSoup
+2. **store_raw_data** - Save raw CSV to MinIO
+3. **clean_transform_data** - 8-step data quality pipeline with Pandas
+4. **store_processed_data** - Save Parquet to MinIO + load to PostgreSQL
+5. **verify_data_quality** - Validate schema, types, and generate statistics
+6. **generate_quality_report** - Create comprehensive quality summary
+
+**Key Features:**
+- ✅ Full ETL lifecycle (Extract → Transform → Load)
+- ✅ Multi-format storage (CSV, Parquet, PostgreSQL)
+- ✅ 8-step data cleaning pipeline
+- ✅ Price outlier detection (quantile-based)
+- ✅ Phone model extraction from titles
+- ✅ Quality verification with assertions
+- ✅ Automatic error handling & retries
+- ✅ Detailed logging at each stage
+
+**Best For:** Production use, course submission, complete data pipeline
+
+---
 
 ### 2. `marketplace_advanced_flow`
-- **Schedule:** Every 6 hours
-- **Description:** Advanced workflow with parallel scraping
-- **Features:**
-  - Parallel keyword scraping
-  - Data validation branching
-  - Smart storage (by keyword)
-  - Auto cleanup (30-day retention)
-  - Failure handling
+**DAG ID:** `marketplace_advanced_flow`  
+**Schedule:** Every 6 hours (`0 */6 * * *`)  
+**Purpose:** Advanced workflow with parallel scraping
+
+**Pipeline Stages:**
+1. **start** - Initialize workflow
+2. **scrape_[keyword]** - Parallel scraping for multiple keywords
+3. **validate_data_quality** - Check data completeness (branching logic)
+4. **store_data_[keyword]** - Save by keyword to MinIO
+5. **cleanup_old_files** - Remove files older than 30 days
+6. **notify_success / notify_failure** - Status notifications
+
+**Key Features:**
+- 🔄 Parallel execution (scrape multiple keywords simultaneously)
+- 🌲 Branching logic (skip bad data automatically)
+- 📁 Organized storage (by_keyword/ folder structure)
+- 🧹 Auto cleanup (30-day retention policy)
+- 🔔 Success/failure notifications
+- ⚡ Optimized for high-volume scraping
+
+**Best For:** Large-scale scraping, multiple product categories, production scalability
+
+---
 
 ### 3. `marketplace_scraper_with_details`
-- **Schedule:** Hourly
-- **Description:** Detailed scraper with deduplication
-- **Features:**
-  - Login support (Airflow Variables)
-  - Detail fetching (condition, description)
-  - Smart deduplication (insert/update/skip)
-  - Hourly files (replace mode)
-  - Daily files (append mode)
+**DAG ID:** `marketplace_scraper_with_details`  
+**Schedule:** Hourly (`0 * * * *`)  
+**Purpose:** Detailed scraper with smart deduplication
 
-### 4. `etl_pipeline_minio` (Legacy)
-- **Schedule:** Hourly
-- **Description:** Basic ETL example
-- **Tasks:** Extract → Transform → Load → Report
+**Pipeline Stages:**
+1. **scrape_marketplace_data** - Scrape with optional login (Airflow Variables)
+2. **fetch_product_details** - Get detailed info (condition, description, specs)
+3. **deduplicate_and_store** - Smart dedup logic (insert/update/skip)
+4. **save_hourly_snapshot** - Replace mode (hourly files)
+5. **save_daily_cumulative** - Append mode (daily aggregation)
+
+**Key Features:**
+- 🔐 Login support (via Airflow Variables: fb_marketplace_email, fb_marketplace_password)
+- 📝 Detailed product information (condition, full description)
+- 🔍 Smart deduplication:
+  - **Insert** - New URLs
+  - **Update** - Existing URLs with different data
+  - **Skip** - Exact duplicates
+- ⏰ Hourly snapshots (marketplace_YYYYMMDD_HH.csv)
+- 📅 Daily cumulative (marketplace_YYYYMMDD.csv)
+- 🎯 URL-based duplicate detection
+
+**Best For:** Frequent monitoring, price tracking, detailed product analysis
+
+---
+
+### 4. `marketplace_scraper` (Basic Version)
+**DAG ID:** `facebook_marketplace_scraper`  
+**Schedule:** Every 6 hours (`0 */6 * * *`)  
+**Purpose:** Simple scraper for learning
+
+**Pipeline Stages:**
+1. **scrape_marketplace** - Basic scraping (title, price, location)
+2. **store_to_minio** - Save CSV to MinIO
+
+**Key Features:**
+- 📱 Basic info only (title, price, location, image)
+- 💾 Simple storage (CSV to MinIO)
+- 🎓 Clean, readable code
+- 🚀 Fast execution
+
+**Best For:** Learning, testing, basic scraping needs
+
+---
+
+### 5. `etl_pipeline_minio` (Legacy/Example)
+**DAG ID:** `etl_pipeline_minio`  
+**Schedule:** Hourly (`@hourly`)  
+**Purpose:** ETL reference implementation
+
+**Pipeline Stages:**
+1. **extract_from_minio** - Read raw data from MinIO
+2. **transform_data** - Basic cleaning and aggregation
+3. **load_to_minio** - Write back to MinIO
+4. **generate_report** - Create summary statistics
+
+**Best For:** Learning ETL concepts, post-processing existing data
+
+---
+
+### 6. `minio_upload_example`
+**DAG ID:** `minio_upload_example`  
+**Schedule:** Daily (`@daily`)  
+**Purpose:** Test MinIO connection
+
+**Pipeline Stages:**
+1. **test_connection** - Verify MinIO connectivity
+2. **create_bucket** - Ensure bucket exists
+3. **upload_test_file** - Upload sample file
+4. **list_files** - Display bucket contents
+
+**Best For:** Testing MinIO setup, debugging connection issues
+
+---
+
+## 📊 DAG Comparison Table
+
+| DAG | Complexity | Speed | Detail Level | Best Use Case |
+|-----|-----------|-------|-------------|---------------|
+| `complete_etl_pipeline` ⭐ | ⭐⭐⭐⭐⭐ | Medium | Very High | Production, Course Submission |
+| `marketplace_advanced_flow` | ⭐⭐⭐⭐ | Fast | High | Large-scale, Multi-keyword |
+| `marketplace_scraper_with_details` | ⭐⭐⭐ | Medium | Very High | Price Tracking, Details |
+| `marketplace_scraper` | ⭐⭐ | Fast | Medium | Learning, Basic Scraping |
+| `etl_pipeline_minio` | ⭐⭐ | Fast | Low | ETL Learning, Reprocessing |
+| `minio_upload_example` | ⭐ | Very Fast | N/A | Testing, Debugging |
 
 ## 🗂️ MinIO Storage Structure
 
@@ -367,57 +470,269 @@ with DAG(
 
 ## 🐛 Troubleshooting
 
-### ปัญหา: Airflow ไม่เห็น DAGs
+### Issue: Airflow DAGs not appearing
 
 ```bash
-# เช็คว่า DAG files อยู่ในโฟลเดอร์ที่ถูกต้อง
+# Check DAG files exist
 ls -la dags/
 
-# ดู logs ของ scheduler
-docker-compose logs airflow-scheduler
+# View scheduler logs
+docker-compose logs airflow-scheduler | tail -50
+
+# Restart scheduler
+docker-compose restart airflow-scheduler
 ```
 
-### ปัญหา: ไม่สามารถเชื่อมต่อ MinIO
+### Issue: Cannot connect to MinIO
 
 ```bash
-# เช็ค MinIO service
+# Check MinIO service status
 docker-compose ps minio
 
-# ทดสอบเชื่อมต่อ
+# Test MinIO health
 curl http://localhost:9000/minio/health/live
+
+# Restart MinIO
+docker-compose restart minio
 ```
 
-### ปัญหา: Permission denied
+### Issue: Permission denied errors
 
 ```bash
-# ตั้งค่า permissions
+# Windows (CMD/PowerShell)
+icacls logs /grant Everyone:F /t
+icacls dags /grant Everyone:F /t
+icacls plugins /grant Everyone:F /t
+
+# Linux/Mac
 chmod -R 777 logs/
 chmod -R 777 dags/
 chmod -R 777 plugins/
 ```
 
-## 📚 Resources
+### Issue: Out of memory
+
+```bash
+# Increase Docker memory limit to at least 4GB
+# Docker Desktop → Settings → Resources → Memory
+
+# Or reduce Airflow workers
+# Edit docker-compose.yml:
+# AIRFLOW__CELERY__WORKER_CONCURRENCY: 2
+```
+
+### Issue: Selenium/Chrome errors
+
+```bash
+# The Dockerfile already includes Chrome
+# If issues persist, rebuild:
+docker-compose down
+docker-compose build --no-cache
+docker-compose up -d
+```
+
+### Issue: PostgreSQL connection failed
+
+```bash
+# Check PostgreSQL logs
+docker-compose logs postgres
+
+# Access PostgreSQL directly
+docker exec -it airflow-minio-project-postgres-1 psql -U airflow
+
+# Reset database (⚠️ deletes all data)
+docker-compose down -v
+docker-compose up -d
+```
+
+### Issue: DAG runs stuck in "running" state
+
+```bash
+# Clear task instances
+docker exec -it airflow-minio-project-airflow-scheduler-1 \
+  airflow tasks clear complete_etl_pipeline
+
+# Or via UI: Browse → Task Instances → Select → Actions → Clear
+```
+
+## 🔄 Update to Latest Version
+
+If someone cloned your repository and wants to update:
+
+```bash
+# Navigate to project folder
+cd airflow-minio-project
+
+# Pull latest changes
+git pull origin main
+
+# Restart Docker to apply changes
+docker-compose down
+docker-compose up -d --build
+```
+
+## 🌐 Deployment to DigitalOcean
+
+### Requirements
+- Droplet: 4GB RAM minimum (Basic $24/month)
+- Ubuntu 22.04 LTS
+- Volume: 50-100GB for data storage
+
+### Setup Steps
+
+```bash
+# 1. Install Docker
+sudo apt update
+sudo apt install docker.io docker-compose git -y
+sudo systemctl enable docker
+sudo systemctl start docker
+
+# 2. Clone repository
+git clone https://github.com/Lizosy/airflow-minio-project.git
+cd airflow-minio-project
+
+# 3. Configure firewall
+sudo ufw allow 22/tcp    # SSH
+sudo ufw allow 8080/tcp  # Airflow
+sudo ufw allow 9000/tcp  # MinIO API
+sudo ufw allow 9001/tcp  # MinIO Console
+sudo ufw enable
+
+# 4. Update docker-compose.yml (change localhost to your IP/domain)
+# Edit AIRFLOW__WEBSERVER__BASE_URL
+# Edit MINIO_ENDPOINT
+
+# 5. Start services
+docker-compose up -d
+
+# 6. Monitor logs
+docker-compose logs -f
+```
+
+### Security Checklist
+- [ ] Change default passwords (Airflow, MinIO, PostgreSQL)
+- [ ] Use SSH keys instead of passwords
+- [ ] Setup SSL/HTTPS with Nginx + Let's Encrypt
+- [ ] Limit IP access to admin panels
+- [ ] Enable firewall rules
+- [ ] Setup automated backups
+
+## 📚 Additional Documentation
 
 - [Apache Airflow Documentation](https://airflow.apache.org/docs/)
 - [MinIO Documentation](https://min.io/docs/minio/linux/index.html)
 - [Airflow S3 Provider](https://airflow.apache.org/docs/apache-airflow-providers-amazon/stable/index.html)
+- [Selenium Documentation](https://www.selenium.dev/documentation/)
+- [Pandas Documentation](https://pandas.pydata.org/docs/)
+
+## 🎓 Learning Resources
+
+- **Project Files:**
+  - `QUICKSTART.md` - Quick setup guide
+  - `FILE_STRUCTURE.md` - Detailed file organization
+  - `AIRFLOW_VARIABLES_SETUP.md` - Credentials configuration
+
+- **Key Concepts Covered:**
+  - ETL Pipeline Design
+  - Web Scraping Ethics & Techniques
+  - Data Quality Management
+  - Workflow Orchestration
+  - Container Orchestration
+  - Object Storage (S3-compatible)
+  - Relational Databases
+  - Data Serialization Formats
+
+## 🤝 Contributing
+
+This is an educational project. Feel free to:
+- Fork the repository
+- Submit issues
+- Suggest improvements
+- Share your modifications
+
+## ⚖️ Legal & Ethical Considerations
+
+**Web Scraping Guidelines:**
+- ✅ Only scrapes publicly available data
+- ✅ Respects rate limiting (2-3 second delays)
+- ✅ No personal information collected
+- ✅ Follows robots.txt guidelines
+- ✅ Educational purpose only
+
+**Production Use:**
+- Review Facebook's Terms of Service
+- Implement proper authentication
+- Use official APIs when available
+- Respect data privacy laws (GDPR, PDPA)
+
+## 📊 Project Statistics
+
+- **Lines of Code:** ~2,000+ Python
+- **DAGs:** 6 different workflow patterns
+- **Data Quality Steps:** 8-stage cleaning pipeline
+- **Storage Formats:** 3 (CSV, Parquet, PostgreSQL)
+- **Docker Services:** 7 containers
+- **Technologies:** 10+ frameworks/tools
+
+## 🏆 Course Compliance Summary
+
+| Requirement | Implementation | Status |
+|------------|----------------|--------|
+| Data Acquisition | Selenium + BeautifulSoup web scraping | ✅ Complete |
+| Data Storage | MinIO (S3) + PostgreSQL + Parquet | ✅ Complete |
+| Data Cleaning | 8-step Pandas pipeline | ✅ Complete |
+| Data Transformation | Feature engineering, normalization | ✅ Complete |
+| Data Loading | Multi-format storage with verification | ✅ Complete |
+| Reproducibility | Docker Compose + requirements.txt | ✅ Complete |
+| Documentation | Comprehensive README + guides | ✅ Complete |
+| Workflow Orchestration | Apache Airflow DAGs | ✅ Complete |
 
 ## 🔐 Security Notes
 
-**⚠️ สำคัญ:** ตัวอย่างนี้ใช้ credentials เริ่มต้นสำหรับการพัฒนาเท่านั้น
+**⚠️ Important:** Default credentials are for development only!
 
-สำหรับ Production:
-- เปลี่ยน passwords ทั้งหมด
-- ใช้ secret management (Vault, AWS Secrets Manager)
-- ตั้งค่า SSL/TLS
-- กำหนด network policies
-- เปิด authentication และ authorization
+**For Production:**
+- Change all default passwords
+- Use environment variables for secrets
+- Implement secret management (Vault, AWS Secrets Manager)
+- Enable SSL/TLS certificates
+- Configure network policies
+- Enable authentication & authorization
+- Setup monitoring & alerts
+- Implement backup strategies
+
+## 📝 Version History
+
+- **v1.0** (Nov 2025) - Initial release with complete ETL pipeline
+- **v1.1** (Nov 2025) - Added advanced workflow patterns
+- **v1.2** (Nov 2025) - Enhanced data quality checks
+- **v1.3** (Nov 2025) - Fixed JSON serialization, datetime parsing
+
+## 📧 Contact & Support
+
+**Repository:** https://github.com/Lizosy/airflow-minio-project  
+**Issues:** https://github.com/Lizosy/airflow-minio-project/issues
+
+For questions or support:
+1. Check documentation in `/docs` folder
+2. Review existing issues on GitHub
+3. Submit new issue with detailed description
 
 ## 📄 License
 
-This project is for educational purposes.
+This project is for **educational purposes only**.
+
+Use at your own risk. The authors are not responsible for any misuse or violations of third-party terms of service.
 
 ---
 
-**Created:** November 2025
-**Author:** team Cheesedip
+**Created:** November 2025  
+**Team:** Cheesedip  
+**Course:** Data Engineering  
+**University:** [Your University Name]
+
+---
+
+### ⭐ If this project helped you, please give it a star!
+
+Made with ❤️ for Data Engineering students
